@@ -78,7 +78,7 @@ const Dash = () => {
       <div style={styles.metrics}>
         {[
           { icon: <FaHeartbeat />, title: "Heart Rate", value: `${healthData.heart_rate} bpm`, color: "#ff4d4d" },
-          { icon: <FaTemperatureHigh />, title: "Temperature", value: `${healthData.temperature} °C`, color: "#007bff" },
+          { icon: <FaTemperatureHigh />, title: " Body Temperature", value: `${healthData.temperature} °C`, color: "#007bff" },
           { icon: <FaLungs />, title: "SpO2", value: `${healthData.spo2} %`, color: "#28a745" },
         ].map((metric, index) => (
           <motion.div
