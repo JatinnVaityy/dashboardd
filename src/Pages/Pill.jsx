@@ -3,6 +3,7 @@ import axios from "axios";
 import { FaTrash } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import pill from "../assets/pill.jpg";
+import { toast } from "react-toastify"; // Import react-toastify
 
 const SmartPillReminder = () => {
   const [pillName, setPillName] = useState("");
@@ -31,13 +32,17 @@ const SmartPillReminder = () => {
       reminders.forEach(async (reminder, index) => {
         if (reminder.time === currentTime && !reminder.sent) {
           try {
-            await axios.post("http://localhost:5000/api/sendReminder", reminder);
-            alert(`Reminder sent for ${reminder.pillName} at ${reminder.time}`);
+            await axios.post("https://server-2i6q.onrender.com/api/sendReminder", reminder);
+            toast.success(`Reminder sent for ${reminder.pillName} at ${reminder.time}`); // Display success toast
 
-            const updatedReminders = reminders.map((r, i) =>
-              i === index ? { ...r, sent: true } : r
-            );
-            setReminders(updatedReminders);
+            const updatedReminders = reminders.filter((_, i) => i !== index); // Remove the sent reminder
+            setReminders(updatedReminders); // Update the state
+
+            // Optionally update the sent status if you don't want to delete
+            // const updatedReminders = reminders.map((r, i) =>
+            //   i === index ? { ...r, sent: true } : r
+            // );
+            // setReminders(updatedReminders);
           } catch (error) {
             console.error("Failed to send reminder:", error);
           }

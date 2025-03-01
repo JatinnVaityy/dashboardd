@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { ToastContainer, toast } from "react-toastify";
 import "./PatientForm.css";
 
 const PatientForm = () => {
@@ -43,7 +44,7 @@ const PatientForm = () => {
     const requiredFields = ["firstName", "lastName", "dob", "gender", "phone", "email", "emergencyContactName", "emergencyPhone"];
     for (let field of requiredFields) {
       if (!formData[field]) {
-        alert(`Please fill in the required field: ${field}`);
+        toast.error(`Please fill in the required field: ${field}`);
         return false;
       }
     }
@@ -56,7 +57,7 @@ const PatientForm = () => {
 
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:5000/submit", {
+      const response = await fetch("https://server-2i6q.onrender.com/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -69,10 +70,10 @@ const PatientForm = () => {
 
       localStorage.setItem("patientReport", JSON.stringify(formData));
       setSubmitted(true);
-      alert("Patient data submitted successfully!");
+      toast.success("Patient data submitted successfully!");
     } catch (error) {
       console.error("Error sending data:", error);
-      alert("Error submitting data.");
+      toast.error("Error submitting data.");
     } finally {
       setLoading(false);
     }
@@ -103,25 +104,25 @@ const PatientForm = () => {
           {selectedSection === 0 && (
             <div className="form-section">
               <div className="form-row">
-                <label>First Name</label>
+                <label>First Name :</label>
                 <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} placeholder="Enter first name" required />
-                <label>Last Name</label>
+                <label>Last Name :</label>
                 <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} placeholder="Enter last name" required />
               </div>
               <div className="form-row">
-                <label>Date of Birth</label>
+                <label>Date of Birth :</label>
                 <input type="date" name="dob" value={formData.dob} onChange={handleChange} required />
-                <label>Gender</label>
+                <label>Gender :</label>
                 <select name="gender" value={formData.gender} onChange={handleChange} required>
-                  <option value="">Select Gender</option>
+                  <option value="">Select Gender :</option>
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
                 </select>
               </div>
               <div className="form-row">
-                <label>Phone</label>
+                <label>Phone :</label>
                 <input type="text" name="phone" value={formData.phone} onChange={handleChange} placeholder="Enter phone number" required />
-                <label>Email</label>
+                <label>Email :</label>
                 <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Enter email address" required />
               </div>
             </div>
@@ -130,32 +131,32 @@ const PatientForm = () => {
           {selectedSection === 1 && (
             <div className="form-section">
               <div className="form-row">
-              <label>Blood Type</label>
-<select name="bloodType" value={formData.bloodType} onChange={handleChange} required>
-  <option value="">Select Blood Type</option>
-  <option value="A+">A+</option>
-  <option value="A-">A-</option>
-  <option value="B+">B+</option>
-  <option value="B-">B-</option>
-  <option value="AB+">AB+</option>
-  <option value="AB-">AB-</option>
-  <option value="O+">O+</option>
-  <option value="O-">O-</option>
-</select>
+                <label>Blood Type :</label>
+                <select name="bloodType" value={formData.bloodType} onChange={handleChange} required>
+                  <option value="">Select Blood Type</option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                </select>
 
-                <label>Height (cm)</label>
+                <label>Height (cm) :</label>
                 <input type="number" name="height" value={formData.height} onChange={handleChange} placeholder="Enter height in cm" />
               </div>
               <div className="form-row">
-                <label>Weight (kg)</label>
+                <label>Weight (kg) :</label>
                 <input type="number" name="weight" value={formData.weight} onChange={handleChange} placeholder="Enter weight in kg" />
                 <label>Allergies</label>
                 <textarea name="allergies" value={formData.allergies} onChange={handleChange} placeholder="List any allergies"></textarea>
               </div>
               <div className="form-row">
-                <label>Medications</label>
+                <label>Medications :</label>
                 <textarea name="medications" value={formData.medications} onChange={handleChange} placeholder="Current medications (if any)"></textarea>
-                <label>Chronic Conditions</label>
+                <label>Chronic Conditions :</label>
                 <textarea name="chronicConditions" value={formData.chronicConditions} onChange={handleChange} placeholder="Chronic conditions (if any)"></textarea>
               </div>
             </div>
@@ -164,15 +165,15 @@ const PatientForm = () => {
           {selectedSection === 2 && (
             <div className="form-section">
               <div className="form-row">
-                <label>Emergency Contact Name</label>
+                <label>Emergency Contact Name :</label>
                 <input type="text" name="emergencyContactName" value={formData.emergencyContactName} onChange={handleChange} placeholder="Enter emergency contact name" required />
-                <label>Relationship</label>
+                <label>Relationship :</label>
                 <input type="text" name="emergencyRelationship" value={formData.emergencyRelationship} onChange={handleChange} placeholder="e.g. Parent, Sibling, Friend" />
               </div>
               <div className="form-row">
-                <label>Emergency Phone</label>
+                <label>Emergency Phone :</label>
                 <input type="text" name="emergencyPhone" value={formData.emergencyPhone} onChange={handleChange} placeholder="Enter emergency contact number" required />
-                <label>Preferred Hospital</label>
+                <label>Preferred Hospital :</label>
                 <input type="text" name="preferredHospital" value={formData.preferredHospital} onChange={handleChange} placeholder="Enter preferred hospital (if any)" />
               </div>
             </div>
@@ -188,6 +189,9 @@ const PatientForm = () => {
           </div>
         </form>
       )}
+      
+      {/* Toast Notification Container */}
+      <ToastContainer />
     </div>
   );
 };
