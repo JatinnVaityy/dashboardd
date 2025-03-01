@@ -2,7 +2,7 @@ import React from "react";
 import { Routes, Route, Link } from "react-router-dom";
 
 // Import your pages
-import Dashboard from "./pages/Dashboard";
+import Dashboard from "./Pages/Dashboard";
 import PillReminder from "./Pages/Pill";
 
 const App = () => {
