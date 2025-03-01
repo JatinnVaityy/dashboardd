@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FaTrash } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
 import pill from "../assets/pill.jpg";
 
 const SmartPillReminder = () => {
@@ -15,16 +16,17 @@ const SmartPillReminder = () => {
     localStorage.setItem("reminders", JSON.stringify(reminders));
   }, [reminders]);
 
-  // Function to format phone number correctly
   const formatPhoneNumber = (number) => {
     return number.startsWith("+") ? number : "+91" + number;
   };
 
-  // Function to send reminders at the exact time
   useEffect(() => {
     const checkReminder = setInterval(async () => {
       const now = new Date();
-      const currentTime = now.getHours().toString().padStart(2, "0") + ":" + now.getMinutes().toString().padStart(2, "0");
+      const currentTime =
+        now.getHours().toString().padStart(2, "0") +
+        ":" +
+        now.getMinutes().toString().padStart(2, "0");
 
       reminders.forEach(async (reminder, index) => {
         if (reminder.time === currentTime && !reminder.sent) {
@@ -32,7 +34,6 @@ const SmartPillReminder = () => {
             await axios.post("http://localhost:5000/api/sendReminder", reminder);
             alert(`Reminder sent for ${reminder.pillName} at ${reminder.time}`);
 
-            // Mark reminder as sent to avoid duplicate sending
             const updatedReminders = reminders.map((r, i) =>
               i === index ? { ...r, sent: true } : r
             );
@@ -42,12 +43,11 @@ const SmartPillReminder = () => {
           }
         }
       });
-    }, 60000); // Check every minute
+    }, 60000);
 
     return () => clearInterval(checkReminder);
   }, [reminders]);
 
-  // Function to add a new reminder
   const handleSubmit = (e) => {
     e.preventDefault();
     const formattedNumber = formatPhoneNumber(phoneNumber);
@@ -58,40 +58,93 @@ const SmartPillReminder = () => {
     setPhoneNumber("");
   };
 
- 
   const removeReminder = (index) => {
-    const updatedReminders = reminders.filter((_, i) => i !== index);
-    setReminders(updatedReminders);
+    setReminders((prevReminders) => prevReminders.filter((_, i) => i !== index));
   };
 
   return (
-    <div className="container">
+    <motion.div 
+      className="container"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.6 }}
+    >
       <div className="main-container">
-        <div className="image-container">
+        <motion.div 
+          className="image-container"
+          initial={{ scale: 0.9 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 0.5 }}
+        >
           <img src={pill} alt="Pill Reminder" />
-        </div>
+        </motion.div>
 
-        <div className="form-container">
+        <motion.div 
+          className="form-container"
+          initial={{ x: -50, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
           <h1 className="heading">Smart Pill Reminder</h1>
           <form onSubmit={handleSubmit}>
-            <input type="text" placeholder="Pill Name" value={pillName} onChange={(e) => setPillName(e.target.value)} required />
-            <input type="time" value={time} onChange={(e) => setTime(e.target.value)} required />
-            <input type="text" placeholder="Phone Number" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} required />
-            <button type="submit">Set Reminder</button>
+            <motion.input 
+              type="text" 
+              placeholder="Pill Name" 
+              value={pillName} 
+              onChange={(e) => setPillName(e.target.value)} 
+              required 
+              whileFocus={{ scale: 1.05 }}
+            />
+            <motion.input 
+              type="time" 
+              value={time} 
+              onChange={(e) => setTime(e.target.value)} 
+              required 
+              whileFocus={{ scale: 1.05 }}
+            />
+            <motion.input 
+              type="text" 
+              placeholder="Phone Number" 
+              value={phoneNumber} 
+              onChange={(e) => setPhoneNumber(e.target.value)} 
+              required 
+              whileFocus={{ scale: 1.05 }}
+            />
+            <motion.button 
+              type="submit"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Set Reminder
+            </motion.button>
           </form>
 
           <h3 className="sub-heading">Upcoming Reminders</h3>
           <div className="reminder-list">
-            {reminders.map((reminder, index) => (
-              <div key={index} className="reminder-item">
-                <span>
-                  <strong>{reminder.pillName}</strong> at {reminder.time} for {reminder.phoneNumber}
-                </span>
-                <FaTrash className="delete-icon" onClick={() => removeReminder(index)} />
-              </div>
-            ))}
+            <AnimatePresence>
+              {reminders.map((reminder, index) => (
+                <motion.div 
+                  key={index} 
+                  className="reminder-item"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <span>
+                    <strong>{reminder.pillName}</strong> at {reminder.time} for {reminder.phoneNumber}
+                  </span>
+                  <motion.div 
+                    whileHover={{ scale: 1.2 }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <FaTrash className="delete-icon" onClick={() => removeReminder(index)} />
+                  </motion.div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       <style>{`
@@ -108,25 +161,8 @@ const SmartPillReminder = () => {
           flex-wrap: wrap;
           max-width: 1000px;
           width: 100%;
-          overflow: hidden;
         }
 
-        @media (max-width: 768px) {
-  .main-container {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .image-container img {
-    max-width: 60%; /* Reduce image size on small screens */
-  }
-}
-
-@media (max-width: 480px) {
-  .image-container img {
-    max-width: 50%; /* Further reduce image size for very small screens */
-  }
-}
         .image-container {
           flex: 1;
           display: flex;
@@ -139,7 +175,6 @@ const SmartPillReminder = () => {
           width: 100%;
           max-width: 380px;
           border-radius: 10px;
-            mix-blend-mode: multiply;
         }
 
         .form-container {
@@ -148,24 +183,18 @@ const SmartPillReminder = () => {
           min-width: 300px;
         }
 
-        .form-container input {
+        .form-container input, .form-container button {
           width: 100%;
           padding: 10px;
           margin: 5px 0;
-          border: 1px solid #ccc;
           border-radius: 5px;
           font-size: 16px;
         }
 
         .form-container button {
-          width: 100%;
-          padding: 10px;
-          margin-top: 10px;
           background-color: #1890ff;
           color: white;
           border: none;
-          border-radius: 5px;
-          font-size: 16px;
           cursor: pointer;
           transition: background 0.3s ease;
         }
@@ -189,10 +218,6 @@ const SmartPillReminder = () => {
           padding: 8px;
           margin: 5px 0;
           border-bottom: 1px solid #ddd;
-        }
-
-        .reminder-item:last-child {
-          border-bottom: none;
         }
 
         .delete-icon {
@@ -219,20 +244,8 @@ const SmartPillReminder = () => {
           font-size: 18px;
           color: #1890ff;
         }
-
-        /* Responsive Styling */
-        @media (max-width: 768px) {
-          .main-container {
-            flex-direction: column;
-            text-align: center;
-          }
-
-          .image-container img {
-            max-width: 80%;
-          }
-        }
       `}</style>
-    </div>
+    </motion.div>
   );
 };
 

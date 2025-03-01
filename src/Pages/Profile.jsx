@@ -104,9 +104,9 @@ const PatientForm = () => {
             <div className="form-section">
               <div className="form-row">
                 <label>First Name</label>
-                <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} required />
+                <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} placeholder="Enter first name" required />
                 <label>Last Name</label>
-                <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} required />
+                <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} placeholder="Enter last name" required />
               </div>
               <div className="form-row">
                 <label>Date of Birth</label>
@@ -120,9 +120,9 @@ const PatientForm = () => {
               </div>
               <div className="form-row">
                 <label>Phone</label>
-                <input type="text" name="phone" value={formData.phone} onChange={handleChange} required />
+                <input type="text" name="phone" value={formData.phone} onChange={handleChange} placeholder="Enter phone number" required />
                 <label>Email</label>
-                <input type="email" name="email" value={formData.email} onChange={handleChange} required />
+                <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Enter email address" required />
               </div>
             </div>
           )}
@@ -130,22 +130,33 @@ const PatientForm = () => {
           {selectedSection === 1 && (
             <div className="form-section">
               <div className="form-row">
-                <label>Blood Type</label>
-                <input type="text" name="bloodType" value={formData.bloodType} onChange={handleChange} />
+              <label>Blood Type</label>
+<select name="bloodType" value={formData.bloodType} onChange={handleChange} required>
+  <option value="">Select Blood Type</option>
+  <option value="A+">A+</option>
+  <option value="A-">A-</option>
+  <option value="B+">B+</option>
+  <option value="B-">B-</option>
+  <option value="AB+">AB+</option>
+  <option value="AB-">AB-</option>
+  <option value="O+">O+</option>
+  <option value="O-">O-</option>
+</select>
+
                 <label>Height (cm)</label>
-                <input type="number" name="height" value={formData.height} onChange={handleChange} />
+                <input type="number" name="height" value={formData.height} onChange={handleChange} placeholder="Enter height in cm" />
               </div>
               <div className="form-row">
                 <label>Weight (kg)</label>
-                <input type="number" name="weight" value={formData.weight} onChange={handleChange} />
+                <input type="number" name="weight" value={formData.weight} onChange={handleChange} placeholder="Enter weight in kg" />
                 <label>Allergies</label>
-                <textarea name="allergies" value={formData.allergies} onChange={handleChange} />
+                <textarea name="allergies" value={formData.allergies} onChange={handleChange} placeholder="List any allergies"></textarea>
               </div>
               <div className="form-row">
                 <label>Medications</label>
-                <textarea name="medications" value={formData.medications} onChange={handleChange} />
+                <textarea name="medications" value={formData.medications} onChange={handleChange} placeholder="Current medications (if any)"></textarea>
                 <label>Chronic Conditions</label>
-                <textarea name="chronicConditions" value={formData.chronicConditions} onChange={handleChange} />
+                <textarea name="chronicConditions" value={formData.chronicConditions} onChange={handleChange} placeholder="Chronic conditions (if any)"></textarea>
               </div>
             </div>
           )}
@@ -154,15 +165,15 @@ const PatientForm = () => {
             <div className="form-section">
               <div className="form-row">
                 <label>Emergency Contact Name</label>
-                <input type="text" name="emergencyContactName" value={formData.emergencyContactName} onChange={handleChange} required />
+                <input type="text" name="emergencyContactName" value={formData.emergencyContactName} onChange={handleChange} placeholder="Enter emergency contact name" required />
                 <label>Relationship</label>
-                <input type="text" name="emergencyRelationship" value={formData.emergencyRelationship} onChange={handleChange} />
+                <input type="text" name="emergencyRelationship" value={formData.emergencyRelationship} onChange={handleChange} placeholder="e.g. Parent, Sibling, Friend" />
               </div>
               <div className="form-row">
                 <label>Emergency Phone</label>
-                <input type="text" name="emergencyPhone" value={formData.emergencyPhone} onChange={handleChange} required />
+                <input type="text" name="emergencyPhone" value={formData.emergencyPhone} onChange={handleChange} placeholder="Enter emergency contact number" required />
                 <label>Preferred Hospital</label>
-                <input type="text" name="preferredHospital" value={formData.preferredHospital} onChange={handleChange} />
+                <input type="text" name="preferredHospital" value={formData.preferredHospital} onChange={handleChange} placeholder="Enter preferred hospital (if any)" />
               </div>
             </div>
           )}

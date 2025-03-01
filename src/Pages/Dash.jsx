@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Line } from "react-chartjs-2";
+import { motion } from "framer-motion";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -10,22 +11,21 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import { Card, CardBody, CardTitle, Spinner } from "reactstrap";
+import { FaHeartbeat, FaTemperatureHigh, FaLungs } from "react-icons/fa";
 
-// Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 const Dash = () => {
   const [chartData, setChartData] = useState({
     labels: [],
     datasets: [
-      { label: "Heart Rate (bpm)", data: [], borderColor: "#FF6B6B", backgroundColor: "rgba(255, 107, 107, 0.2)", borderWidth: 2 },
-      { label: "Temperature (°C)", data: [], borderColor: "#1890FF", backgroundColor: "rgba(24, 144, 255, 0.2)", borderWidth: 2 },
-      { label: "SpO2 (%)", data: [], borderColor: "#28C76F", backgroundColor: "rgba(40, 199, 111, 0.2)", borderWidth: 2 },
+      { label: "Heart Rate (bpm)", data: [], borderColor: "#FF4D4D", backgroundColor: "rgba(255, 77, 77, 0.2)", borderWidth: 2 },
+      { label: "Temperature (°C)", data: [], borderColor: "#007BFF", backgroundColor: "rgba(0, 123, 255, 0.2)", borderWidth: 2 },
+      { label: "SpO2 (%)", data: [], borderColor: "#28A745", backgroundColor: "rgba(40, 167, 69, 0.2)", borderWidth: 2 },
     ],
   });
 
-  const [loading, setLoading] = useState(true);
+  const [healthData, setHealthData] = useState({ heart_rate: "--", temperature: "--", spo2: "--" });
   const intervalRef = useRef(null);
 
   useEffect(() => {
@@ -34,106 +34,117 @@ const Dash = () => {
         const response = await fetch("http://127.0.0.1:5000/health-data");
         const data = await response.json();
 
-        console.log("Fetched Health Data:", data); // Log the fetched data
+        setHealthData(data);
 
-        setChartData((prevData) => {
-          const time = [...prevData.labels, new Date().toLocaleTimeString()].slice(-10);
-
-          return {
-            labels: time,
-            datasets: [
-              {
-                label: "Heart Rate (bpm)",
-                data: [...prevData.datasets[0].data, data.heart_rate].slice(-10),
-                borderColor: "#FF6B6B",
-                backgroundColor: "rgba(255, 107, 107, 0.2)",
-                borderWidth: 2,
-              },
-              {
-                label: "Temperature (°C)",
-                data: [...prevData.datasets[1].data, data.temperature].slice(-10),
-                borderColor: "#1890FF",
-                backgroundColor: "rgba(24, 144, 255, 0.2)",
-                borderWidth: 2,
-              },
-              {
-                label: "SpO2 (%)",
-                data: [...prevData.datasets[2].data, data.spo2].slice(-10),
-                borderColor: "#28C76F",
-                backgroundColor: "rgba(40, 199, 111, 0.2)",
-                borderWidth: 2,
-              },
-            ],
-          };
-        });
-
-        setLoading(false);
+        setChartData((prevData) => ({
+          labels: [...prevData.labels, new Date().toLocaleTimeString()].slice(-10),
+          datasets: prevData.datasets.map((dataset, i) => ({
+            ...dataset,
+            data: [...dataset.data, data[i === 0 ? "heart_rate" : i === 1 ? "temperature" : "spo2"]].slice(-10),
+          })),
+        }));
       } catch (error) {
-        console.error("Error fetching health data:", error);
-        setLoading(false);
+        console.error("Error fetching data:", error);
       }
     };
 
     fetchData();
-    intervalRef.current = setInterval(fetchData, 5000); // Fetch new data every 5 seconds
-
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
+    intervalRef.current = setInterval(fetchData, 5000);
+    return () => clearInterval(intervalRef.current);
   }, []);
 
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false, // Allows height to increase
-    plugins: { legend: { display: true, position: "top" } },
-    scales: {
-      x: { title: { display: true, text: "Time", color: "#2C3E50" } },
-      y: { title: { display: true, text: "Values", color: "#2C3E50" } },
-    },
-    elements: {
-      line: { tension: 0.3 }, // Smooth curves
-      point: { radius: 3 },
-    },
-  };
-
   return (
-    <Card
-      className="border-0 shadow p-4 rounded"
-      style={{
-        background: "#F4F6F9", // Light background for a clean UI
-        borderColor: "#1890FF",
-        height: "500px",
-      }}
-    >
-      <CardBody
-        style={{
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-        }}
+    <div style={styles.dashboard}>
+      <motion.div
+        style={styles.chartContainer}
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
       >
-        <CardTitle
-          tag="h4"
-          className="text-center mb-4"
-          style={{ color: "#1890FF", fontWeight: "bold" }}
-        >
-          Live Health Monitoring 
-        </CardTitle>
+        <Line
+          data={chartData}
+          options={{
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: true, position: "top" } },
+            scales: {
+              x: { title: { display: true, text: "Time", color: "#666" } },
+              y: { title: { display: true, text: "Value", color: "#666" } },
+            },
+          }}
+        />
+      </motion.div>
 
-        {loading ? (
-          <div className="text-center">
-            <Spinner color="primary" />
-            <p className="mt-2" style={{ color: "#2C3E50" }}>Fetching latest health data...</p>
-          </div>
-        ) : (
-          <div style={{ flexGrow: 1, height: "450px" }}> {/* Increased chart height */}
-            <Line data={chartData} options={options} />
-          </div>
-        )}
-      </CardBody>
-    </Card>
+      <div style={styles.metrics}>
+        {[
+          { icon: <FaHeartbeat />, title: "Heart Rate", value: `${healthData.heart_rate} bpm`, color: "#ff4d4d" },
+          { icon: <FaTemperatureHigh />, title: "Temperature", value: `${healthData.temperature} °C`, color: "#007bff" },
+          { icon: <FaLungs />, title: "SpO2", value: `${healthData.spo2} %`, color: "#28a745" },
+        ].map((metric, index) => (
+          <motion.div
+            key={index}
+            style={{ ...styles.card, borderLeft: `5px solid ${metric.color}`, color: metric.color }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: index * 0.2, duration: 0.6, ease: "easeOut" }}
+          >
+            <div style={styles.icon}>{metric.icon}</div>
+            <h4>{metric.title}</h4>
+            <p>{metric.value}</p>
+          </motion.div>
+        ))}
+      </div>
+    </div>
   );
+};
+
+const styles = {
+  dashboard: {
+    fontFamily: "Rubik",
+    textAlign: "center",
+    
+    height: "80vh",
+    padding: "20px",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  chartContainer: {
+    background: "white",
+    padding: "20px",
+    borderRadius: "12px",
+  
+    width: "90%",
+    height: "70vh",
+  },
+  metrics: {
+    display: "flex",
+    justifyContent: "center",
+    gap: "20px",
+    marginTop: "20px",
+  },
+  card: {
+    background: "rgba(255, 255, 255, 0.8)",
+    backdropFilter: "blur(10px)",
+    padding: "15px",
+    width: "190px",
+    height: "100px",
+    borderRadius: "12px",
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+    textAlign: "center",
+    transition: "transform 0.3s ease-in-out",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    fontWeight: "600",
+    fontSize: "16px",
+  },
+  icon: {
+    fontSize: "30px",
+    marginBottom: "5px",
+  },
 };
 
 export default Dash;
