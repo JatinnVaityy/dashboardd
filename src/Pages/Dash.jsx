@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Line } from "react-chartjs-2";
 import { motion } from "framer-motion";
+import axios from "axios"; // Import Axios
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -26,32 +27,54 @@ const Dash = () => {
   });
 
   const [healthData, setHealthData] = useState({ heart_rate: "--", temperature: "--", spo2: "--" });
+  const [loading, setLoading] = useState(false);
   const intervalRef = useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:5000/health-data");
-        const data = await response.json();
+        // Fetch real sensor data from Flask backend
+        const response = await axios.get("https://backend-kf44.onrender.com/get-health-data");
 
-        setHealthData(data);
+        const data = response.data;
+        setHealthData(data); // Update health metrics
 
-        setChartData((prevData) => ({
-          labels: [...prevData.labels, new Date().toLocaleTimeString()].slice(-10),
-          datasets: prevData.datasets.map((dataset, i) => ({
+        // Update chart data
+        setChartData((prevData) => {
+          const newLabels = [...prevData.labels, new Date().toLocaleTimeString()].slice(-10);
+          const newDatasets = prevData.datasets.map((dataset, i) => ({
             ...dataset,
-            data: [...dataset.data, data[i === 0 ? "heart_rate" : i === 1 ? "temperature" : "spo2"]].slice(-10),
-          })),
-        }));
+            data: [
+              ...dataset.data,
+              i === 0 ? data.heart_rate : i === 1 ? data.temperature : data.spo2,
+            ].slice(-10),
+          }));
+          return { labels: newLabels, datasets: newDatasets };
+        });
       } catch (error) {
         console.error("Error fetching data:", error);
+        setHealthData({ heart_rate: "--", temperature: "--", spo2: "--" });
       }
     };
 
-    fetchData();
-    intervalRef.current = setInterval(fetchData, 5000);
+    fetchData(); // Initial fetch
+    intervalRef.current = setInterval(fetchData, 5000); // Fetch every 5s
+
     return () => clearInterval(intervalRef.current);
   }, []);
+
+  const handleDownload = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      const link = document.createElement("a");
+      link.href = "/your-pdf-file.pdf"; // Replace with actual PDF path
+      link.download = "Health_Insights.pdf"; 
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }, 5000);
+  };
 
   return (
     <div style={styles.dashboard}>
@@ -78,7 +101,7 @@ const Dash = () => {
       <div style={styles.metrics}>
         {[
           { icon: <FaHeartbeat />, title: "Heart Rate", value: `${healthData.heart_rate} bpm`, color: "#ff4d4d" },
-          { icon: <FaTemperatureHigh />, title: " Body Temperature", value: `${healthData.temperature} °C`, color: "#007bff" },
+          { icon: <FaTemperatureHigh />, title: "Body Temperature", value: `${(healthData.temperature / 1.6).toFixed(1)} °C`, color: "#007bff" },
           { icon: <FaLungs />, title: "SpO2", value: `${healthData.spo2} %`, color: "#28a745" },
         ].map((metric, index) => (
           <motion.div
@@ -94,6 +117,8 @@ const Dash = () => {
           </motion.div>
         ))}
       </div>
+
+     
     </div>
   );
 };
@@ -102,7 +127,6 @@ const styles = {
   dashboard: {
     fontFamily: "Rubik",
     textAlign: "center",
-    
     height: "80vh",
     padding: "20px",
     display: "flex",
@@ -114,7 +138,6 @@ const styles = {
     background: "white",
     padding: "20px",
     borderRadius: "12px",
-  
     width: "90%",
     height: "70vh",
   },
@@ -144,6 +167,20 @@ const styles = {
   icon: {
     fontSize: "30px",
     marginBottom: "5px",
+  },
+  button: {
+    marginTop: "20px",
+    padding: "5px 10px",
+    fontSize: "16px",
+    fontWeight: "bold",
+    border: "none",
+    borderRadius: "8px",
+    backgroundColor: "#007BFF",
+    color: "#fff",
+    cursor: "pointer",
+    transition: "background 0.3s",
+    outline: "none",
+    width: "200px",
   },
 };
 

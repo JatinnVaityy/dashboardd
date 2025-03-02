@@ -18,7 +18,6 @@ const App = () => {
     { path: "/pill-reminder", label: "Pill Reminder", icon: <FaPills /> },
     { path: "/gps-location", label: "GPS Location", icon: <FaMapMarkerAlt /> },
     { path: "/symptom-checker", label: "Symptom Checker", icon: <FaStethoscope /> },
-    { path: "/alerts", label: "Alerts", icon: <FaBell /> },
     { path: "/profile", label: "Profile", icon: <FaUser /> },
   ];
 

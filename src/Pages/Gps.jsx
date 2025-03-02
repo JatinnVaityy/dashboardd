@@ -8,7 +8,7 @@ const GPSMap = () => {
     const fetchGPSData = async () => {
       console.log("Fetching GPS data...");
       try {
-        const response = await fetch("http://192.168.186.32:5000/get-location-data");
+        const response = await fetch("http://192.168.186.32:5000/get_location_data");
         if (!response.ok) throw new Error("Failed to fetch location data");
 
         const data = await response.json();
@@ -50,7 +50,7 @@ const GPSMap = () => {
       ></iframe>
       <p><strong>Latitude:</strong> {position.lat}</p>
       <p><strong>Longitude:</strong> {position.lng}</p>
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      
     </div>
   );
 };
