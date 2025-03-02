@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Line } from "react-chartjs-2";
 import { motion } from "framer-motion";
-import axios from "axios"; // Import Axios
+import axios from "axios"; 
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -28,25 +28,24 @@ const Dash = () => {
 
   const [healthData, setHealthData] = useState({ heart_rate: "--", temperature: "--", spo2: "--" });
   const [loading, setLoading] = useState(false);
+  const [generating, setGenerating] = useState(false);
   const intervalRef = useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch real sensor data from Flask backend
         const response = await axios.get("https://backend-kf44.onrender.com/get-health-data");
 
         const data = response.data;
-        setHealthData(data); // Update health metrics
+        setHealthData(data);
 
-        // Update chart data
         setChartData((prevData) => {
           const newLabels = [...prevData.labels, new Date().toLocaleTimeString()].slice(-10);
           const newDatasets = prevData.datasets.map((dataset, i) => ({
             ...dataset,
             data: [
               ...dataset.data,
-              i === 0 ? data.heart_rate : i === 1 ? data.temperature : data.spo2,
+              i === 0 ? data.heart_rate : i === 1 ? data.temperature/2 : data.spo2,
             ].slice(-10),
           }));
           return { labels: newLabels, datasets: newDatasets };
@@ -57,23 +56,23 @@ const Dash = () => {
       }
     };
 
-    fetchData(); // Initial fetch
-    intervalRef.current = setInterval(fetchData, 5000); // Fetch every 5s
+    fetchData();
+    intervalRef.current = setInterval(fetchData, 5000);
 
     return () => clearInterval(intervalRef.current);
   }, []);
 
-  const handleDownload = () => {
-    setLoading(true);
+  const handleGenerateInsights = () => {
+    setGenerating(true);
     setTimeout(() => {
-      setLoading(false);
+      setGenerating(false);
       const link = document.createElement("a");
-      link.href = "/your-pdf-file.pdf"; // Replace with actual PDF path
-      link.download = "Health_Insights.pdf"; 
+      link.href = "/Health_Insights.pdf"; 
+      link.download = "Health_Insights.pdf";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    }, 5000);
+    }, 10000);
   };
 
   return (
@@ -101,7 +100,7 @@ const Dash = () => {
       <div style={styles.metrics}>
         {[
           { icon: <FaHeartbeat />, title: "Heart Rate", value: `${healthData.heart_rate} bpm`, color: "#ff4d4d" },
-          { icon: <FaTemperatureHigh />, title: "Body Temperature", value: `${(healthData.temperature / 1.6).toFixed(1)} °C`, color: "#007bff" },
+          { icon: <FaTemperatureHigh />, title: "Body Temperature", value: `${(healthData.temperature / 2).toFixed(1)} °C`, color: "#007bff" },
           { icon: <FaLungs />, title: "SpO2", value: `${healthData.spo2} %`, color: "#28a745" },
         ].map((metric, index) => (
           <motion.div
@@ -118,7 +117,9 @@ const Dash = () => {
         ))}
       </div>
 
-     
+      <button style={styles.button} onClick={handleGenerateInsights} disabled={generating}>
+        {generating ? "Generating Insights..." : "Generate Insights"}
+      </button>
     </div>
   );
 };
@@ -169,18 +170,24 @@ const styles = {
     marginBottom: "5px",
   },
   button: {
-    marginTop: "20px",
-    padding: "5px 10px",
-    fontSize: "16px",
+    position: "fixed",
+    bottom: "20px",
+    right: "20px",
+    padding: "6px 12px",  // Smaller padding
+    fontSize: "14px",  // Smaller font size
     fontWeight: "bold",
     border: "none",
-    borderRadius: "8px",
+    borderRadius: "6px",
     backgroundColor: "#007BFF",
     color: "#fff",
     cursor: "pointer",
     transition: "background 0.3s",
     outline: "none",
-    width: "200px",
+    width: "150px",  // Smaller width
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+
   },
 };
 
