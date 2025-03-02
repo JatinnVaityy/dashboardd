@@ -67,8 +67,8 @@ const Dash = () => {
     setTimeout(() => {
       setGenerating(false);
       const link = document.createElement("a");
-      link.href = "/Health_Insights.pdf"; 
-      link.download = "Health_Insights.pdf";
+      link.href = "/health_report.pdf"; 
+      link.download = "health_report.pdf";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
