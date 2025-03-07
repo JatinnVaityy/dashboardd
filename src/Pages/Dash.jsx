@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Line } from "react-chartjs-2";
 import { motion } from "framer-motion";
-import axios from "axios"; 
+import axios from "axios";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -20,13 +20,35 @@ const Dash = () => {
   const [chartData, setChartData] = useState({
     labels: [],
     datasets: [
-      { label: "Heart Rate (bpm)", data: [], borderColor: "#FF4D4D", backgroundColor: "rgba(255, 77, 77, 0.2)", borderWidth: 2 },
-      { label: "Temperature (°C)", data: [], borderColor: "#007BFF", backgroundColor: "rgba(0, 123, 255, 0.2)", borderWidth: 2 },
-      { label: "SpO2 (%)", data: [], borderColor: "#28A745", backgroundColor: "rgba(40, 167, 69, 0.2)", borderWidth: 2 },
+      {
+        label: "Heart Rate (bpm)",
+        data: [],
+        borderColor: "#FF4D4D",
+        backgroundColor: "rgba(255, 77, 77, 0.2)",
+        borderWidth: 2,
+      },
+      {
+        label: "Temperature (°C)",
+        data: [],
+        borderColor: "#007BFF",
+        backgroundColor: "rgba(0, 123, 255, 0.2)",
+        borderWidth: 2,
+      },
+      {
+        label: "SpO2 (%)",
+        data: [],
+        borderColor: "#28A745",
+        backgroundColor: "rgba(40, 167, 69, 0.2)",
+        borderWidth: 2,
+      },
     ],
   });
 
-  const [healthData, setHealthData] = useState({ heart_rate: "--", temperature: "--", spo2: "--" });
+  const [healthData, setHealthData] = useState({
+    heart_rate: "--",
+    temperature: "--",
+    spo2: "--",
+  });
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
   const intervalRef = useRef(null);
@@ -35,8 +57,12 @@ const Dash = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get("https://backend-kf44.onrender.com/get-health-data");
-
         const data = response.data;
+
+        if (!data.heart_rate || !data.temperature || !data.spo2) {
+          return; // Do nothing if data is missing
+        }
+
         setHealthData(data);
 
         setChartData((prevData) => {
@@ -45,7 +71,7 @@ const Dash = () => {
             ...dataset,
             data: [
               ...dataset.data,
-              i === 0 ? data.heart_rate : i === 1 ? data.temperature/2 : data.spo2,
+              i === 0 ? data.heart_rate : i === 1 ? data.temperature / 2 : data.spo2,
             ].slice(-10),
           }));
           return { labels: newLabels, datasets: newDatasets };
@@ -67,7 +93,7 @@ const Dash = () => {
     setTimeout(() => {
       setGenerating(false);
       const link = document.createElement("a");
-      link.href = "/health_report.pdf"; 
+      link.href = "/health_report.pdf";
       link.download = "health_report.pdf";
       document.body.appendChild(link);
       link.click();
@@ -128,7 +154,7 @@ const styles = {
   dashboard: {
     fontFamily: "Rubik",
     textAlign: "center",
-    height: "80vh",
+    height: "auto",
     padding: "20px",
     display: "flex",
     flexDirection: "column",
@@ -140,19 +166,22 @@ const styles = {
     padding: "20px",
     borderRadius: "12px",
     width: "90%",
-    height: "70vh",
+    height: "50vh",
+    minWidth: "300px",
+    maxWidth: "800px",
   },
   metrics: {
     display: "flex",
+    flexWrap: "wrap",
     justifyContent: "center",
-    gap: "20px",
+    gap: "15px",
     marginTop: "20px",
   },
   card: {
     background: "rgba(255, 255, 255, 0.8)",
     backdropFilter: "blur(10px)",
     padding: "15px",
-    width: "190px",
+    width: "180px",
     height: "100px",
     borderRadius: "12px",
     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
@@ -163,18 +192,16 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     fontWeight: "600",
-    fontSize: "16px",
+    fontSize: "14px",
   },
   icon: {
-    fontSize: "30px",
+    fontSize: "24px",
     marginBottom: "5px",
   },
   button: {
-    position: "fixed",
-    bottom: "20px",
-    right: "20px",
-    padding: "6px 12px",  // Smaller padding
-    fontSize: "14px",  // Smaller font size
+    marginTop: "20px",
+    padding: "10px 16px",
+    fontSize: "14px",
     fontWeight: "bold",
     border: "none",
     borderRadius: "6px",
@@ -183,11 +210,10 @@ const styles = {
     cursor: "pointer",
     transition: "background 0.3s",
     outline: "none",
-    width: "150px",  // Smaller width
+    width: "180px",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-
   },
 };
 

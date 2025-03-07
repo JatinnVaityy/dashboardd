@@ -189,9 +189,7 @@ const PatientForm = () => {
           </div>
         </form>
       )}
-      
-      {/* Toast Notification Container */}
-      <ToastContainer />
+   
     </div>
   );
 };
